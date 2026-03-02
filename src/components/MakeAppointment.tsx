@@ -63,7 +63,6 @@ const MakeAppointment = () => {
     appointment_dateTime: '',
     department_id: '',
     consultant_id: '',
-    
   })
 
   const [errors, setErrors] = useState<{
