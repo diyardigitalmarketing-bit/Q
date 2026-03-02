@@ -1,205 +1,267 @@
-"use client";
-
 import { z } from "zod";
 
-/* ======================================================
-   AUTH SCHEMAS
-====================================================== */
-
 export const registerSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-
-  email: z.string()
-    .min(1, "Email is required")
-    .email("Email is invalid"),
-
-  password: z.string()
-    .min(8, "Password must be more than 8 characters")
-    .max(32, "Password must be less than 32 characters"),
-
-  password_confirmation: z.string()
-    .min(8)
-    .max(32)
+    name: z
+        .string()
+        .min(1, "Name is required"),
+    email: z
+        .string()
+        .min(1, "Email is required")
+        .email("Email is invalid"),
+    password: z
+        .string()
+        .min(1, "Password is required")
+        .min(8, "Password must be more than 8 characters")
+        .max(32, "Password must be less than 32 characters"),
+    password_confirmation: z
+        .string()
+        .min(1, "Password confirmation is required")
+        .min(8, "Password confirmation must be more than 8 characters")
+        .max(32, "Password confirmation must be less than 32 characters")
 }).refine(data => data.password === data.password_confirmation, {
-  message: "Passwords do not match",
-  path: ["password_confirmation"]
-});
+    message: "Passwords do not match",
+    path: ["password_confirmation"]
+})
 
-export type RegisterSchema = z.infer<typeof registerSchema>;
+export type RegisterSchema = z.infer<typeof registerSchema>
 
 export const loginSchema = z.object({
-  email: z.string().min(1, "Email is required"),
-  password: z.string().min(1, "Password is required")
-});
+    email: z
+        .string()
+        .min(1, "Email is required"),
+    password: z
+        .string()
+        .min(1, "Password is required")
+})
 
-export type LoginSchema = z.infer<typeof loginSchema>;
+export type LoginScehma = z.infer<typeof loginSchema>
 
-
-/* ======================================================
-   DEPARTMENT
-====================================================== */
 
 export const departmentSchema = z.object({
-  title: z.string().min(1, "Department name is required"),
-  description: z.string().min(1, "Description is required"),
-  image: z.string().min(1, "Image is required"),
-  is_featured: z.number()
-});
+    title: z
+        .string()
+        .min(1, "Department name is required"),
+    description: z
+        .string()
+        .min(1, "Department name is required"),
+    image: z
+        .string()
+        .min(1, "Image is required"),
+    is_featured: z
+        .number()
+})
 
-export type DepartmentSchema = z.infer<typeof departmentSchema>;
-
-
-/* ======================================================
-   CONSULTANT
-====================================================== */
+export type DepartmentSchema = z.infer<typeof departmentSchema>
 
 export const consultantSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+    name: z
+        .string()
+        .min(1, "Name is required"),
+    email: z
+        .string()
+        .min(1, "Email is required")
+        .email("Email is invalid"),
+    password: z
+        .string()
+        .min(1, "Password is required")
+        .min(6, "Password must be more than 6 characters")
+        .max(32, "Password must be less than 32 characters"),
+    office_extension: z
+        .string(),
+    photo: z
+        .string(),
+    departments: z
+        .array(z.string())
+        .min(1, "Department is required"),
+    education: z
+        .array(z.object({
+            degree: z
+                .string()
+                .min(1, "Degree is required"),
+            institute: z
+                .string()
+                .min(1, "Institution is required"),
+            year: z
+                .any()
+                .optional()
+        }))
+        .min(1, "Education is required"),
+    work_experience: z
+        .string(z.string())
+        .min(1, "Experience is required"),
+    membership: z
+        .string(),
+    residency: z
+        .string(),
+    diploma: z
+        .string(),
+    certification: z
+        .string(),
+    award: z
+        .string(),
+    extra_info: z
+        .string()
+})
 
-  email: z.string().email("Email is invalid"),
+export type ConstultantSchema = z.infer<typeof consultantSchema>
 
-  password: z.string()
-    .min(6)
-    .max(32),
+export const editConsultantSchema = z.object({
+    name: z
+        .string()
+        .min(1, "Name is required"),
+    email: z
+        .string()
+        .min(1, "Email is required")
+        .email("Email is invalid"),
+    office_extension: z
+        .string()
+        .min(1, "Office extention is required"),
+    photo: z
+        .string(),
+    departments: z
+        .array(z.string())
+        .min(1, "Department is required"),
+    education: z
+        .array(z.object({
+            degree: z
+                .string()
+                .min(1, "Degree is required"),
+            institute: z
+                .string()
+                .min(1, "Institution is required"),
+            year: z
+                .any()
+                .optional()
+        }))
+        .min(1, "Education is required"),
+    work_experience: z
+        .string(),
+    membership: z
+        .string(),
+    residency: z
+        .string(),
+    diploma: z
+        .string(),
+    certification: z
+        .string(),
+    award: z
+        .string(),
+    extra_info: z
+        .string()
+})
 
-  office_extension: z.string(),
-  photo: z.string(),
-
-  departments: z.array(z.string())
-    .min(1, "Department is required"),
-
-  education: z.array(
-    z.object({
-      degree: z.string().min(1),
-      institute: z.string().min(1),
-      year: z.any().optional()
-    })
-  ).min(1),
-
-  /* ✅ FIXED BUG */
-  work_experience: z.string().min(1, "Experience is required"),
-
-  membership: z.string(),
-  residency: z.string(),
-  diploma: z.string(),
-  certification: z.string(),
-  award: z.string(),
-  extra_info: z.string()
-});
-
-export type ConsultantSchema = z.infer<typeof consultantSchema>;
-
-
-/* ======================================================
-   APPOINTMENT
-====================================================== */
+export type EditConstultantSchema = z.infer<typeof editConsultantSchema>
 
 export const makeAppointmentSchema = z.object({
-  mr_no: z.string(),
+    mr_no: z
+        .string(),
+    patient_name: z
+        .string()
+        .min(1, "Patient name is required"),
+    mobile_no: z
+        .string()
+        .min(1, "Mobile no is required")
+        .max(11, "Mobile must be 11 characters"),
+    appointment_dateTime: z
+        .string()
+        .min(1, "Date & time is required"),
+    department_id: z
+        .string()
+        .min(1, "Department is required"),
+    consultant_id: z
+        .string()
+        .min(1, "Consultant is required"),
+    message: z
+        .string()
+        .min(1, "Message is required")
+})
 
-  patient_name: z.string()
-    .min(1, "Patient name is required"),
+export type MakeAppointmentSchema = z.infer<typeof makeAppointmentSchema>
 
-  mobile_no: z.string()
-    .min(1, "Mobile no is required")
-    .max(11, "Mobile must be 11 characters"),
+export const makeTickersSechema = z.object({
+    title: z
+        .string()
+        .min(1, "Title is required"),
+    url: z
+        .string()
+        .min(1, "url is required")
+})
 
-  appointment_dateTime: z.string()
-    .min(1, "Date & time is required"),
-
-  department_id: z.string()
-    .min(1, "Department is required"),
-
-  consultant_id: z.string()
-    .min(1, "Consultant is required"),
-
-  /* OPTIONAL MESSAGE */
-  message: z.string().optional()
-});
-
-export type MakeAppointmentSchema =
-  z.infer<typeof makeAppointmentSchema>;
-
-
-/* ======================================================
-   FORMDATA SAFE HELPER
-====================================================== */
-
-export const appendFormData = (
-  formData: FormData,
-  key: string,
-  value: unknown
-) => {
-  if (value === undefined || value === null) {
-    formData.append(key, "");
-    return;
-  }
-
-  formData.append(key, String(value));
-};
+export type MakeTickersSchema = z.infer<typeof makeTickersSechema>
 
 
-/* ======================================================
-   API ACTION
-====================================================== */
+export const addNewPageSchema = z.object({
+    title: z
+        .string()
+        .min(1, "Title is required"),
+    short_description: z
+        .string()
+        .min(1, "url is required"),
+    description: z
+        .string()
+        .min(1, "url is required")
+})
 
-export async function MakePublicAppointmentAction(
-  formData: FormData
-) {
-  const response = await fetch("/api/make-appointment", {
-    method: "POST",
-    body: formData,
-  });
-
-  return response.json();
-}
+export type AddNewPageSchema = z.infer<typeof addNewPageSchema>
 
 
-/* ======================================================
-   SUBMIT HANDLER (YOUR ERROR WAS HERE)
-====================================================== */
+export const addNewSlideSchema = z.object({
+    title: z
+        .string(),
+    description: z
+        .string(),
+    image: z
+        .string()
+        .min(1, "image is required"),
+    slideUrl: z
+        .string(),
+})
 
-export const submitAppointment = async (
-  data: MakeAppointmentSchema,
-  departmentId: number | string | undefined,
-  consultantId: number | string | undefined,
-  setLoading: (value: boolean) => void
-) => {
+export type AddNewSlideSchema = z.infer<typeof addNewSlideSchema>
 
-  try {
-    setLoading(true);
+export const createCareerSchema = z.object({
+    position: z
+        .string()
+        .min(1, "Positiion is required"),
+    department_id: z
+        .string(),
+    description: z
+        .string()
+        .min(1, "description is required"),
+    open_date: z
+        .string()
+        .min(1, "open date is required"),
+    close_date: z
+        .string()
+        .min(1, "close date is required")
+})
 
-    const result = makeAppointmentSchema.safeParse(data);
+export type CreateCareerSchema = z.infer<typeof createCareerSchema>
 
-    if (!result.success) {
-      console.log(result.error.flatten());
-      setLoading(false);
-      return;
-    }
+export const applyToJobSchema = z.object({
+    name: z
+        .string()
+        .min(1, "Name is required"),
+    career_id: z
+        .string()
+        .min(1, "Career Id is required"),
+    email: z
+        .string()
+        .min(1, "email is required"),
+    phone: z
+        .string()
+        .min(1, "phone is required"),
+    address: z
+        .string()
+        .min(1, "address is required"),
+    city: z
+        .string()
+        .min(1, "city is required"),
+    resume: z
+        .string()
+        .min(1, "resume is required")
+})
 
-    const formData = new FormData();
+export type ApplyToJobSchema = z.infer<typeof applyToJobSchema>
 
-    appendFormData(formData, "mr_no", result.data.mr_no);
-    appendFormData(formData, "patient_name", result.data.patient_name);
-    appendFormData(formData, "mobile_no", result.data.mobile_no);
-    appendFormData(formData, "appointment_dateTime",
-      result.data.appointment_dateTime);
 
-    /* ✅ FIXED TYPESCRIPT ERROR */
-    appendFormData(formData, "department_id", departmentId);
-    appendFormData(formData, "consultant_id", consultantId);
-    appendFormData(formData, "message", result.data.message);
-
-    const res = await MakePublicAppointmentAction(formData);
-
-    if (res.status === "success") {
-      console.log("Appointment Created Successfully");
-    }
-
-    setLoading(false);
-
-  } catch (error) {
-    console.error(error);
-    setLoading(false);
-  }
-};
