@@ -228,7 +228,7 @@ const BookAppointment = ({
       formData.append('appointment_dateTime', formatteddateTime)
       formData.append('department_id', departmentId?.toString())
       formData.append('consultant_id', consultantId?.toString())
-      formData.append('message', result.data.message)
+    
       const res = await MakePublicAppointmentAction(formData)
       if (res.status === 'success') {
         setLoading(false)
@@ -400,18 +400,7 @@ const BookAppointment = ({
               )}
             </div>
 
-            <div className="col-12 col-md-6 ">
-              <textarea
-                className="form-control"
-                name="message"
-                value={myForm.message}
-                onChange={handleChange}
-                placeholder="Message"
-              ></textarea>
-              {errors.message && (
-                <p className="text-danger">{errors.message}</p>
-              )}
-            </div>
+            
 
             <div className="col-12">
               <button
@@ -432,5 +421,8 @@ const BookAppointment = ({
     </div>
   )
 }
+
+export default BookAppointment
+
 
 export default BookAppointment
