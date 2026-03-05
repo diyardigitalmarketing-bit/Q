@@ -221,7 +221,6 @@ const MakeAdminAppointment = () => {
       formData.append('appointment_dateTime', formatteddateTime)
       formData.append('department_id', result.data.department_id)
       formData.append('consultant_id', result.data.consultant_id)
-      formData.append('message', result.data.message)
       const res = await MakeAppointmentAction(formData)
       if (res.status === 'success') {
         setLoading(false)
@@ -429,5 +428,8 @@ const MakeAdminAppointment = () => {
     </div>
   )
 }
+
+export default MakeAdminAppointment
+
 
 export default MakeAdminAppointment
