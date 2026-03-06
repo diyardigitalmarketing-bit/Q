@@ -1,5 +1,5 @@
 import React from 'react'
-import CreateDepartment from '@/app/(home)/Receptionist/departments/edit/CreateDepartment'
+import CreateDepartment from '../CreateDepartment'
 const CreateDepartmentPage = () => {
   return (
     <div>
