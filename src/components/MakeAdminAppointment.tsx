@@ -429,4 +429,4 @@ const MakeAdminAppointment = () => {
   )
 }
 
-export default MakeAdminAppointment  
+export default MakeAdminAppointment
