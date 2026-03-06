@@ -171,9 +171,12 @@ export const makeAppointmentSchema = z.object({
     consultant_id: z
         .string()
         .min(1, "Consultant is required"),
+
+    // ✅ ONLY CHANGE DONE HERE
     message: z
         .string()
-        .min(1, "Message is required")
+        .optional()
+        .or(z.literal(''))
 })
 
 export type MakeAppointmentSchema = z.infer<typeof makeAppointmentSchema>
@@ -263,5 +266,3 @@ export const applyToJobSchema = z.object({
 })
 
 export type ApplyToJobSchema = z.infer<typeof applyToJobSchema>
-
-
