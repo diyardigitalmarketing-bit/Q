@@ -225,7 +225,7 @@ const MakeAppointment = () => {
       formData.append('appointment_dateTime', formatteddateTime)
       formData.append('department_id', result.data.department_id)
       formData.append('consultant_id', result.data.consultant_id)
-      formData.append('message', result.data.message)
+     
       const res = await MakePublicAppointmentAction(formData)
       if (res.status === 'success') {
         setLoading(false)
@@ -402,18 +402,7 @@ const MakeAppointment = () => {
               )}
             </div>
 
-            <div className="col-12 ">
-              <textarea
-                className="form-control"
-                name="message"
-                value={myForm.message}
-                onChange={handleChange}
-                placeholder="Message"
-              ></textarea>
-              {errors.message && (
-                <p className="text-danger">{errors.message}</p>
-              )}
-            </div>
+           
 
             <div className="col-12">
               <button
