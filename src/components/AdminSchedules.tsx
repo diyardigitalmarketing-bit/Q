@@ -1,4 +1,5 @@
 'use client'
+
 import React, { useEffect, useRef, useState } from 'react'
 import { Calendar } from '@fullcalendar/core'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -33,44 +34,57 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   onUpdateAvailability,
   consultantId,
 }) => {
-  const [availableSchedule, setAvailableSchedule] = useState<AvailabilityEvent[]>([])
   const calendarRef = useRef<HTMLDivElement>(null)
   const calendarInstanceRef = useRef<Calendar | null>(null)
+
+  const [availableSchedule, setAvailableSchedule] = useState<any[]>([])
   const [selectedEvent, setSelectedEvent] = useState<EventApi | null>(null)
   const [contextMenuPosition, setContextMenuPosition] = useState({ left: 0, top: 0 })
   const [showContextMenu, setShowContextMenu] = useState(false)
   const [examineDuration, setExamineDuration] = useState('30')
   const [loading, setLoading] = useState(false)
 
-  const getSchedule = async () => {
-    setLoading(true)
-    const res = await getAdminConsultantSchedule(consultantId)
-    setAvailableSchedule(res.schedule_days)
-    setExamineDuration(res.examine_duration)
-    setLoading(false)
-  }
-
-  useEffect(() => {
-    getSchedule()
-  }, [consultantId])
-
-  // convert minutes to HH:mm:ss format
   const formatDuration = (minutes: number) => {
     const hrs = Math.floor(minutes / 60)
     const mins = minutes % 60
     return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:00`
   }
 
+  const getSchedule = async () => {
+    try {
+      setLoading(true)
+
+      const res = await getAdminConsultantSchedule(consultantId)
+
+      if (!res) {
+        setAvailableSchedule([])
+        setExamineDuration('30')
+        return
+      }
+
+      setAvailableSchedule(res.schedule_days ?? [])
+      setExamineDuration(res.examine_duration ?? '30')
+    } catch (error) {
+      console.error('Schedule fetch error:', error)
+      setAvailableSchedule([])
+      setExamineDuration('30')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    getSchedule()
+  }, [consultantId])
+
   useEffect(() => {
     if (!calendarRef.current) return
 
-    const calendarEl = calendarRef.current
-
-    const calendar = new Calendar(calendarEl, {
+    const calendar = new Calendar(calendarRef.current, {
       plugins: [timeGridPlugin, interactionPlugin],
       events: availableSchedule,
-      dayHeaderFormat: { weekday: 'long' },
       initialView: 'timeGridWeek',
+      dayHeaderFormat: { weekday: 'long' },
       editable: true,
       selectable: true,
       droppable: true,
@@ -80,8 +94,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
       timeZone: 'Asia/Karachi',
       initialDate: '2023-01-01',
 
-      // ⭐ Dynamic Slot Duration
-      slotDuration: formatDuration(Number(examineDuration)),
+      slotDuration: formatDuration(Number(examineDuration) || 30),
 
       slotLabelFormat: {
         hour: '2-digit',
@@ -91,6 +104,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
       select: (info: DateSelectArg) => {
         const newEvent = calendar.addEvent({
+          id: crypto.randomUUID(),
           title: 'Availability',
           start: info.startStr,
           end: info.endStr,
@@ -104,9 +118,8 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
       eventDrop: (info: EventDropArg) => {
         const event = info.event
-        const eventStart = event.start as Date
-        const eventEnd =
-          event.end || new Date(eventStart.getTime() + 60 * 60 * 1000)
+        const eventStart = event.start || new Date()
+        const eventEnd = event.end || new Date(eventStart.getTime() + 60 * 60 * 1000)
 
         if (eventStart.getDate() !== eventEnd.getDate()) {
           event.setEnd(
@@ -146,8 +159,9 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     const mergeOverlappingEvents = (newEvent: EventApi) => {
       const events = calendar.getEvents()
 
-      let mergedStart = newEvent.start as Date
-      let mergedEnd = newEvent.end as Date
+      let mergedStart = newEvent.start || new Date()
+      let mergedEnd =
+        newEvent.end || new Date(mergedStart.getTime() + 30 * 60 * 1000)
 
       events.forEach((event) => {
         if (event.id !== newEvent.id && event.title === 'Availability') {
@@ -171,7 +185,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
       newEvent.remove()
 
       calendar.addEvent({
-        id: Math.random().toString(36).substr(2, 9),
+        id: crypto.randomUUID(),
         title: 'Availability',
         start: mergedStart,
         end: mergedEnd,
@@ -190,6 +204,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
   useEffect(() => {
     const handleClick = () => setShowContextMenu(false)
+
     document.addEventListener('click', handleClick)
 
     return () => {
@@ -270,6 +285,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
           </button>
         </div>
       )}
+
     </div>
   )
 }
