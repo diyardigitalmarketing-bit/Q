@@ -1,6 +1,6 @@
 import { getDepartments } from '@/app/lib/getDepartments'
 import React from 'react'
-import AllDepartments from './AllDepartments'
+import AllDepartments from '../AllDepartments'
 
 interface DepartmentData {
   id: number;
