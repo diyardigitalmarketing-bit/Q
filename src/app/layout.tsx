@@ -20,16 +20,19 @@ import './styles/style.css'
 import 'react-responsive-carousel/lib/styles/carousel.min.css'
 import Wrapper from '@/components/Wrapper'
 import { Toaster } from 'react-hot-toast'
+import { initializeReceptionist } from "@/app/lib/initializeReceptionist"
 
 const heebo = Heebo({
   weight: ['400', '500', '600', '700'],
   subsets: ['latin'],
 })
+
 const roboto = Roboto({
   weight: ['400', '500', '700'],
   style: ['normal', 'italic'],
   subsets: ['latin'],
 })
+
 const rubik = Rubik({
   weight: ['400', '500', '600', '700'],
   style: ['normal', 'italic'],
@@ -41,62 +44,61 @@ export const metadata: Metadata = {
   description: 'Quaid-e-Azam International Hospital',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
+
+  // ✅ Call receptionist initializer
+  await initializeReceptionist()
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <Script
           src="/assets/js/vendor/jquery-3.6.0.min.js"
           strategy="afterInteractive"
-        ></Script>
+        />
         <Script
           src="/assets/js/vendor.min.js"
           strategy="afterInteractive"
-        ></Script>
-
+        />
         <Script
           src="/assets/js/vendor/bootstrap.bundle.min.js"
           strategy="afterInteractive"
-        ></Script>
+        />
         <Script
           src="/assets/js/vendor/imagesLoaded.js"
           strategy="afterInteractive"
-        ></Script>
+        />
         <Script
           src="/assets/js/vendor/index.js"
           strategy="afterInteractive"
-        ></Script>
+        />
         <Script
           src="/assets/js/vendor/isotope.pkgd.min.js"
           strategy="afterInteractive"
-        ></Script>
+        />
         <Script
           src="/assets/js/vendor/jquery-ui.min.js"
           strategy="afterInteractive"
-        ></Script>
+        />
         <Script
           src="/assets/js/vendor/owl.carousel.min.js"
           strategy="afterInteractive"
-        ></Script>
+        />
         <Script
           src="/assets/js/vendor/owl.carousel2.thumbs.min.js"
           strategy="afterInteractive"
-        ></Script>
-        {/* <Script
-          src="/assets/js/functions.js"
-          strategy="afterInteractive"
-        ></Script> */}
+        />
       </head>
-      <body
-        className={`${heebo.className} ${roboto.className} ${rubik.className}`}
-      >
+
+      <body className={`${heebo.className} ${roboto.className} ${rubik.className}`}>
         <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
 
         <Wrapper>{children}</Wrapper>
+
         <div className="backtop" id="back-to-top" data-hover="">
           <svg
             className="bi bi-chevron-up"
@@ -109,7 +111,7 @@ export default function RootLayout({
             <path
               fillRule="evenodd"
               d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"
-            ></path>
+            />
           </svg>
         </div>
       </body>
