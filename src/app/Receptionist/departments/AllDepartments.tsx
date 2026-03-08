@@ -17,17 +17,20 @@ interface DepartmentData {
 interface Department {
   status: string
   message: string
-  data: DepartmentData[]
+  data?: DepartmentData[]
 }
 
 const Departments = ({ departments }: { departments: Department }) => {
-  const [departmentsArr, setDepartmentsArr] = useState(departments.data)
+  const [departmentsArr, setDepartmentsArr] = useState<DepartmentData[]>(
+    departments?.data || []
+  )
 
   const handleDelete = async (id: number) => {
-    let res = await DepartmentDeleteAction(id)
+    const res = await DepartmentDeleteAction(id)
+
     if (res.status === 'success') {
-      setDepartmentsArr(
-        departmentsArr.filter((department) => department.id !== id)
+      setDepartmentsArr((prev) =>
+        prev.filter((department) => department.id !== id)
       )
       toast.success(res.message)
     } else {
@@ -42,6 +45,7 @@ const Departments = ({ departments }: { departments: Department }) => {
           <div>
             <h4>Departments</h4>
           </div>
+
           <div>
             <Link
               href="/admin/departments/create"
@@ -52,6 +56,7 @@ const Departments = ({ departments }: { departments: Department }) => {
             </Link>
           </div>
         </div>
+
         <table className="table">
           <thead>
             <tr>
@@ -60,29 +65,38 @@ const Departments = ({ departments }: { departments: Department }) => {
               <th scope="col">Action</th>
             </tr>
           </thead>
-          <tbody>
-            {departmentsArr.map((department, index) => (
-              <tr key={department.id}>
-                <th scope="row">{index + 1}</th>
-                <td>{department.title}</td>
 
-                <td>
-                  <Link
-                    className="me-4"
-                    href={`/admin/departments/edit/${Number(department.id)}`}
-                  >
-                    <FiEdit role="button" aria-label="Edit department" />
-                  </Link>
-                  <FiTrash
-                    onClick={() => handleDelete(department.id)}
-                    type="button"
-                    role="button"
-                    aria-label="Delete department"
-                    style={{ cursor: 'pointer' }}
-                  />
+          <tbody>
+            {departmentsArr.length > 0 ? (
+              departmentsArr.map((department, index) => (
+                <tr key={department.id}>
+                  <th scope="row">{index + 1}</th>
+                  <td>{department.title}</td>
+
+                  <td>
+                    <Link
+                      className="me-4"
+                      href={`/admin/departments/edit/${department.id}`}
+                    >
+                      <FiEdit role="button" aria-label="Edit department" />
+                    </Link>
+
+                    <FiTrash
+                      onClick={() => handleDelete(department.id)}
+                      role="button"
+                      aria-label="Delete department"
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={3} className="text-center">
+                  No departments found
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
