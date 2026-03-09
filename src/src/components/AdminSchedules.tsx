@@ -40,11 +40,13 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   const calendarRef = useRef<HTMLDivElement>(null)
   const calendarInstanceRef = useRef<Calendar | null>(null)
 
-  // Fetch schedule
+  // Fetch schedule from backend
   const getSchedule = async () => {
+
     setLoading(true)
 
     try {
+
       const res = await fetch(`/api/saveSchedule?consultantId=${consultantId}`)
       const data = await res.json()
 
@@ -52,11 +54,14 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
       setExamineDuration(data.examine_duration || '30')
 
     } catch (err) {
+
       console.error(err)
       toast.error('Failed to fetch schedule')
+
     }
 
     setLoading(false)
+
   }
 
   useEffect(() => {
@@ -64,7 +69,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   }, [consultantId])
 
 
-  // Initialize calendar (ONLY once)
+  // Initialize calendar
   useEffect(() => {
 
     if (!calendarRef.current) return
@@ -79,10 +84,8 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
       eventResizableFromStart: true,
       headerToolbar: false,
       timeZone: 'Asia/Karachi',
-      initialDate: new Date(),
 
-      slotDuration: '00:30:00',
-      slotLabelInterval: '00:30:00',
+      slotDuration: '00:05:00',
       snapDuration: '00:01:00',
 
       slotLabelFormat: {
@@ -91,10 +94,13 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
         hour12: false
       },
 
+      initialDate: new Date(),
+
+      // Add new slot dynamically
       select: (info: DateSelectArg) => {
 
         const duration = parseInt(examineDuration) || 30
-        const endDate = new Date(info.start.getTime() + duration * 60000)
+        const endDate = new Date(info.start.getTime() + duration * 60 * 1000)
 
         const newEvent = calendar.addEvent({
           title: 'Availability',
@@ -108,6 +114,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
         calendar.unselect()
 
         if (newEvent) mergeOverlappingEvents(newEvent)
+
       },
 
       eventDrop: (info: EventDropArg) => mergeOverlappingEvents(info.event),
@@ -133,9 +140,13 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
           setShowContextMenu(true)
 
         })
+
       }
+
     })
 
+
+    // Merge overlapping events
     const mergeOverlappingEvents = (newEvent: EventApi) => {
 
       const events = calendar.getEvents()
@@ -161,7 +172,9 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
             )
 
             event.remove()
+
           }
+
         }
 
       })
@@ -177,6 +190,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
         backgroundColor: '#01306f',
         borderColor: '#01306f'
       })
+
     }
 
     calendar.render()
@@ -184,22 +198,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
     return () => calendar.destroy()
 
-  }, [availableSchedule])
-
-
-  // Dynamic duration update
-  useEffect(() => {
-
-    if (!calendarInstanceRef.current) return
-
-    const duration = parseInt(examineDuration) || 30
-
-    const formatted = `00:${String(duration).padStart(2, '0')}:00`
-
-    calendarInstanceRef.current.setOption('slotDuration', formatted)
-    calendarInstanceRef.current.setOption('slotLabelInterval', formatted)
-
-  }, [examineDuration])
+  }, [availableSchedule, examineDuration])
 
 
   useEffect(() => {
@@ -226,6 +225,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   }
 
 
+  // Save events
   const handleSaveEvents = async () => {
 
     if (!calendarInstanceRef.current) return
@@ -277,7 +277,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   return (
     <div className="position-relative w-100 h-100">
 
-      <div className="mb-2 w-100 d-flex gap-4">
+      <div className="mb-2 w-100 d-flex justify-content-start align-items-baseline gap-4">
 
         <div className="w-25">
 
@@ -293,9 +293,12 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
         </div>
 
-        <div>
+        <div className="mt-4">
 
-          <button className="btn btn-primary" onClick={handleSaveEvents}>
+          <button
+            className="btn btn-primary"
+            onClick={handleSaveEvents}
+          >
             Save Availability
           </button>
 
@@ -336,6 +339,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
     </div>
   )
+
 }
 
 export default AdminAvailabilityCalendar
