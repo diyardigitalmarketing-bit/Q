@@ -87,7 +87,7 @@ const BookAppointment = ({
     appointment_dateTime: '',
     department_id: departmentId?.toString(),
     consultant_id: consultantId?.toString(),
-    message: '',
+    patient_cateogory:' ',
   })
 
   const [errors, setErrors] = useState<{
@@ -228,6 +228,7 @@ const BookAppointment = ({
       formData.append('appointment_dateTime', formatteddateTime)
       formData.append('department_id', departmentId?.toString())
       formData.append('consultant_id', consultantId?.toString())
+      formData.append('patient_category', result.data.patient_category)
     
       const res = await MakePublicAppointmentAction(formData)
       if (res.status === 'success') {
@@ -241,6 +242,7 @@ const BookAppointment = ({
           department_id: '',
           consultant_id: '',
           message: '',
+          patient_category: '',
         })
       } else {
         setLoading(false)

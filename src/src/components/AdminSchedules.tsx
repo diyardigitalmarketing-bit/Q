@@ -5,11 +5,7 @@ import { Calendar } from '@fullcalendar/core'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import type { EventApi, DateSelectArg, EventDropArg } from '@fullcalendar/core'
-import { EventResizeDoneArg } from '@fullcalendar/interaction
-  
-/* ✅ FIXED CSS IMPORTS */
-import '@fullcalendar/core/main.css'
-import '@fullcalendar/timegrid/main.css'
+import { EventResizeDoneArg } from '@fullcalendar/interaction'
 
 import { getAdminConsultantSchedule } from '@/app/lib/getSchedules'
 import Loader from './Loader'
@@ -44,7 +40,6 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   const [examineDuration, setExamineDuration] = useState('30')
   const [loading, setLoading] = useState(false)
 
-  /* ✅ FIXED DURATION FORMAT */
   const formatDuration = (minutes: number) => {
     const hrs = Math.floor(minutes / 60).toString().padStart(2, '0')
     const mins = (minutes % 60).toString().padStart(2, '0')
@@ -54,6 +49,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   const getSchedule = async () => {
     try {
       setLoading(true)
+
       const res = await getAdminConsultantSchedule(consultantId)
 
       const events =
@@ -70,19 +66,19 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
       setExamineDuration(res.examine_duration?.toString() ?? '30')
 
     } catch (error) {
+
       console.error('Schedule fetch error:', error)
       setAvailableSchedule([])
+
     } finally {
       setLoading(false)
     }
   }
 
-  /* Load schedule when consultant changes */
   useEffect(() => {
     getSchedule()
   }, [consultantId])
 
-  /* Initialize FullCalendar */
   useEffect(() => {
 
     if (!calendarRef.current) return
@@ -120,6 +116,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
         mergeOverlappingEvents(info.event),
 
       eventDidMount: (info) => {
+
         info.el.addEventListener('contextmenu', (e) => {
 
           e.preventDefault()
@@ -136,7 +133,6 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
       },
     })
 
-    /* Merge overlapping events */
     const mergeOverlappingEvents = (newEvent: EventApi) => {
 
       const events = calendar.getEvents()
@@ -182,7 +178,6 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
   }, [])
 
-  /* Update events when schedule changes */
   useEffect(() => {
 
     if (!calendarInstanceRef.current) return
