@@ -1,21 +1,40 @@
 import bcrypt from "bcryptjs"
 
+type LoginResult =
+  | {
+      success: true
+      user: {
+        name: string
+        email: string
+        role: string
+      }
+    }
+  | {
+      success: false
+      message: string
+    }
+
 const DEFAULT_USER = {
   email: "receptionist@qih.com",
-  // hashed version of 123456
+  // password = 123456
   password: "$2a$10$7QJQmZCj7FVGHvXZHzVvzOv9q24apqYh6gMPkTFogyXv3gZH/BqhG",
   name: "Receptionist",
   role: "receptionist"
 }
 
-export async function loginUser(email: string, password: string) {
+export async function loginUser(
+  email: string,
+  password: string
+): Promise<LoginResult> {
   try {
-    // check email
+    if (!email || !password) {
+      return { success: false, message: "Email and password required" }
+    }
+
     if (email !== DEFAULT_USER.email) {
       return { success: false, message: "Invalid email or password" }
     }
 
-    // check password
     const passwordMatch = await bcrypt.compare(password, DEFAULT_USER.password)
 
     if (!passwordMatch) {
@@ -30,9 +49,12 @@ export async function loginUser(email: string, password: string) {
         role: DEFAULT_USER.role
       }
     }
-
   } catch (error) {
     console.error("Login error:", error)
-    return { success: false, message: "Login failed" }
+
+    return {
+      success: false,
+      message: "Login failed"
+    }
   }
 }
