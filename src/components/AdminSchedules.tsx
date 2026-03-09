@@ -1,304 +1,222 @@
 'use client'
-
 import React, { useEffect, useRef, useState } from 'react'
 import { Calendar } from '@fullcalendar/core'
 import timeGridPlugin from '@fullcalendar/timegrid'
-import interactionPlugin from '@fullcalendar/interaction'
-
-import type {
-  EventApi,
-  DateSelectArg,
-  EventDropArg,
-  EventInput,
-} from '@fullcalendar/core'
-
-import { EventResizeDoneArg } from '@fullcalendar/interaction'
-
+import interactionPlugin, { EventResizeDoneArg } from '@fullcalendar/interaction'
+import type { EventApi, DateSelectArg, EventDropArg } from '@fullcalendar/core'
 import { getAdminConsultantSchedule } from '@/app/lib/getSchedules'
 import Loader from './Loader'
+import toast from 'react-hot-toast'
+
+interface AvailabilityEvent {
+  id?: string
+  user_id?: number
+  examine_duration?: string
+  start: string | Date
+  end: string | Date
+  title: string
+}
 
 interface AvailabilityCalendarProps {
   consultantId: number
-  onUpdateAvailability?: (
-    events: EventInput[],
-    examineDuration: string
-  ) => void
 }
 
-const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
-  consultantId,
-  onUpdateAvailability,
-}) => {
+const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ consultantId }) => {
+  const [availableSchedule, setAvailableSchedule] = useState<AvailabilityEvent[]>([])
+  const [examineDuration, setExamineDuration] = useState('30')
+  const [loading, setLoading] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState<EventApi | null>(null)
+  const [showContextMenu, setShowContextMenu] = useState(false)
+  const [contextMenuPosition, setContextMenuPosition] = useState({ left: 0, top: 0 })
 
   const calendarRef = useRef<HTMLDivElement>(null)
   const calendarInstanceRef = useRef<Calendar | null>(null)
 
-  const [availableSchedule, setAvailableSchedule] = useState<EventInput[]>([])
-  const [selectedEvent, setSelectedEvent] = useState<EventApi | null>(null)
-  const [showContextMenu, setShowContextMenu] = useState(false)
-  const [contextMenuPosition, setContextMenuPosition] = useState({ left: 0, top: 0 })
-  const [examineDuration, setExamineDuration] = useState('30')
-  const [loading, setLoading] = useState(false)
-
-  const formatDuration = (minutes: number) => {
-    const hrs = Math.floor(minutes / 60).toString().padStart(2, '0')
-    const mins = (minutes % 60).toString().padStart(2, '0')
-    return `${hrs}:${mins}:00`
-  }
-
+  // Fetch saved schedule for this consultant
   const getSchedule = async () => {
-
-    try {
-
-      setLoading(true)
-
-      const res = await getAdminConsultantSchedule(consultantId)
-
-      const events: EventInput[] =
-        res.schedule_days?.map((item: any) => ({
-          id: crypto.randomUUID(),
-          title: 'Availability',
-          start: item.start,
-          end: item.end ?? undefined,
-          backgroundColor: '#01306f',
-          borderColor: '#01306f',
-        })) || []
-
-      setAvailableSchedule(events)
-      setExamineDuration(res.examine_duration?.toString() ?? '30')
-
-    } catch (error) {
-
-      console.error('Schedule fetch error:', error)
-      setAvailableSchedule([])
-
-    } finally {
-
-      setLoading(false)
-
+    setLoading(true)
+    const res = await getAdminConsultantSchedule(consultantId)
+    if (res) {
+      setAvailableSchedule(res.schedule_days || [])
+      setExamineDuration(res.examine_duration || '30')
     }
+    setLoading(false)
   }
 
   useEffect(() => {
     getSchedule()
   }, [consultantId])
 
+  // Initialize calendar
   useEffect(() => {
-
     if (!calendarRef.current) return
 
-    const calendar = new Calendar(calendarRef.current, {
-
+    const calendarEl = calendarRef.current
+    const calendar = new Calendar(calendarEl, {
       plugins: [timeGridPlugin, interactionPlugin],
+      events: availableSchedule,
       initialView: 'timeGridWeek',
+      dayHeaderFormat: { weekday: 'long' },
       editable: true,
       selectable: true,
+      droppable: true,
       allDaySlot: false,
-      height: 650,
+      eventResizableFromStart: true,
       headerToolbar: false,
       timeZone: 'Asia/Karachi',
-      slotDuration: formatDuration(Number(examineDuration) || 30),
-
+      slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+      initialDate: new Date(),
+      
+      // Add new slot dynamically
       select: (info: DateSelectArg) => {
-
+        const durationInMinutes = parseInt(examineDuration) || 30
+        const endDate = new Date(info.start.getTime() + durationInMinutes * 60 * 1000)
         const newEvent = calendar.addEvent({
-          id: crypto.randomUUID(),
           title: 'Availability',
           start: info.start,
-          end: info.end,
+          end: endDate,
+          allDay: false,
           backgroundColor: '#01306f',
           borderColor: '#01306f',
         })
-
         calendar.unselect()
-
         if (newEvent) mergeOverlappingEvents(newEvent)
       },
 
-      eventDrop: (info: EventDropArg) => mergeOverlappingEvents(info.event),
-
-      eventResize: (info: EventResizeDoneArg) =>
-        mergeOverlappingEvents(info.event),
-
-      eventDidMount: (info) => {
-
-        info.el.addEventListener('contextmenu', (e) => {
-
-          e.preventDefault()
-
-          setSelectedEvent(info.event)
-
-          setContextMenuPosition({
-            left: e.pageX - 200,
-            top: e.pageY - 100,
-          })
-
-          setShowContextMenu(true)
-
-        })
-
+      eventDrop: (info: EventDropArg) => {
+        mergeOverlappingEvents(info.event)
       },
 
+      eventResize: (info: EventResizeDoneArg) => {
+        mergeOverlappingEvents(info.event)
+      },
+
+      eventDidMount: (info) => {
+        info.el.addEventListener('contextmenu', (e) => {
+          e.preventDefault()
+          setSelectedEvent(info.event)
+          setContextMenuPosition({ left: e.pageX - 290, top: e.pageY - 100 })
+          setShowContextMenu(true)
+        })
+      },
     })
 
+    // Merge overlapping events
     const mergeOverlappingEvents = (newEvent: EventApi) => {
-
       const events = calendar.getEvents()
-
-      let mergedStart = newEvent.start!
-      let mergedEnd = newEvent.end!
+      let mergedStart = newEvent.start as Date
+      let mergedEnd = newEvent.end as Date
 
       events.forEach((event) => {
-
         if (event.id !== newEvent.id && event.title === 'Availability') {
-
-          if (newEvent.start! < event.end! && newEvent.end! > event.start!) {
-
-            mergedStart = new Date(
-              Math.min(mergedStart.getTime(), event.start!.getTime())
-            )
-
-            mergedEnd = new Date(
-              Math.max(mergedEnd.getTime(), event.end!.getTime())
-            )
-
+          if ((newEvent.start as Date) < (event.end as Date) && (newEvent.end as Date) > (event.start as Date)) {
+            mergedStart = new Date(Math.min(mergedStart.getTime(), (event.start as Date).getTime()))
+            mergedEnd = new Date(Math.max(mergedEnd.getTime(), (event.end as Date).getTime()))
             event.remove()
-
           }
-
         }
-
       })
 
       newEvent.remove()
-
       calendar.addEvent({
-        id: crypto.randomUUID(),
+        id: Math.random().toString(36).substr(2, 9),
         title: 'Availability',
         start: mergedStart,
         end: mergedEnd,
+        allDay: false,
         backgroundColor: '#01306f',
         borderColor: '#01306f',
       })
-
     }
 
-    calendarInstanceRef.current = calendar
     calendar.render()
+    calendarInstanceRef.current = calendar
 
     return () => calendar.destroy()
+  }, [availableSchedule, examineDuration])
 
-  }, [])
-
+  // Hide context menu when clicking elsewhere
   useEffect(() => {
-
-    if (!calendarInstanceRef.current) return
-
-    const calendar = calendarInstanceRef.current
-
-    calendar.removeAllEvents()
-
-    availableSchedule.forEach((event) => {
-      calendar.addEvent(event)
-    })
-
-  }, [availableSchedule])
-
-  useEffect(() => {
-
     const handleClick = () => setShowContextMenu(false)
-
     document.addEventListener('click', handleClick)
-
     return () => document.removeEventListener('click', handleClick)
-
   }, [])
 
+  // Delete event from calendar
   const handleDeleteEvent = () => {
-
-    selectedEvent?.remove()
-    setSelectedEvent(null)
-    setShowContextMenu(false)
-
+    if (selectedEvent) {
+      selectedEvent.remove()
+      setSelectedEvent(null)
+      setShowContextMenu(false)
+    }
   }
 
+  // Save events to backend
   const handleSaveEvents = async () => {
-
     if (!calendarInstanceRef.current) return
+    const events = calendarInstanceRef.current.getEvents().map((event) => ({
+      title: event.title,
+      start: event.start,
+      end: event.end,
+      user_id: consultantId,
+    }))
 
-    const events: EventInput[] =
-      calendarInstanceRef.current.getEvents().map((event) => ({
-        title: event.title,
-        start: event.start!,
-        end: event.end ?? undefined,
-      }))
-
-    if (onUpdateAvailability) {
-      await onUpdateAvailability(events, examineDuration)
+    try {
+      const res = await fetch('/api/saveSchedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          consultantId,
+          examine_duration: examineDuration,
+          schedule_days: events,
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to save schedule')
+      toast.success('Availability saved successfully!')
+    } catch (err) {
+      console.error(err)
+      toast.error('Error saving availability')
     }
-
-    getSchedule()
-
   }
 
   if (loading) return <Loader />
 
   return (
-
-    <div className="position-relative w-100">
-
-      <h3 className="mb-3">Set Your Availability</h3>
-
-      <div className="mb-3 d-flex gap-3">
-
-        <input
-          type="number"
-          value={examineDuration}
-          onChange={(e) => setExamineDuration(e.target.value)}
-          className="form-control"
-          style={{ width: 120 }}
-        />
-
-        <button
-          className="btn btn-primary"
-          onClick={handleSaveEvents}
-        >
-          Save Availability
-        </button>
-
+    <div className="position-relative w-100 h-100">
+      <div className="mb-2 w-100 d-flex justify-content-start align-items-baseline gap-4">
+        <div className="w-25">
+          <input
+            type="number"
+            value={examineDuration}
+            onChange={(e) => setExamineDuration(e.target.value)}
+            className="form-control"
+            placeholder="Examine Duration (min)"
+            min={5}
+            step={5}
+          />
+        </div>
+        <div className="mt-4">
+          <button className="btn btn-primary" onClick={handleSaveEvents}>
+            Save Availability
+          </button>
+        </div>
       </div>
 
-      <div
-        ref={calendarRef}
-        style={{ width: '100%', height: '650px' }}
-      />
+      <div ref={calendarRef} id="calendar" className="w-100 h-100"></div>
 
+      {/* Context Menu */}
       {showContextMenu && (
-
         <div
-          className="position-absolute bg-white p-2 shadow rounded"
-          style={{
-            left: contextMenuPosition.left,
-            top: contextMenuPosition.top,
-            zIndex: 1000,
-          }}
+          className="position-absolute p-2 rounded z-3 bg-white shadow"
+          style={{ left: `${contextMenuPosition.left}px`, top: `${contextMenuPosition.top}px` }}
         >
-
-          <button
-            className="btn btn-danger btn-sm"
-            onClick={handleDeleteEvent}
-          >
+          <button className="btn btn-danger btn-sm" onClick={handleDeleteEvent}>
             Delete Event
           </button>
-
         </div>
-
       )}
-
     </div>
-
   )
-
 }
 
 export default AdminAvailabilityCalendar
