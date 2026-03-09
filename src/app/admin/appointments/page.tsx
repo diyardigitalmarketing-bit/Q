@@ -4,7 +4,6 @@ import React, { useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { MakeAppointmentAction } from '@/app/_actions/_actions'
 
-// Define TypeScript type for your form
 interface AppointmentForm {
   mr_no: string
   patient_name: string
@@ -32,15 +31,27 @@ const MakeAppointment: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const data = new FormData()
+
+    Object.entries(formData).forEach(([key, value]) => {
+      data.append(key, value)
+    })
+
     try {
-      const response = await MakeAppointmentAction(formData)
-      if (response.status === 'success') {
+      const response = await MakeAppointmentAction(data)
+
+      if (response?.status === 'success') {
         toast.success('Appointment booked successfully!')
+
         setFormData({
           mr_no: '',
           patient_name: '',
@@ -52,7 +63,7 @@ const MakeAppointment: React.FC = () => {
           patient_category: '',
         })
       } else {
-        toast.error(response.message || 'Something went wrong')
+        toast.error(response?.message || 'Something went wrong')
       }
     } catch (error: any) {
       toast.error(error.message || 'Something went wrong')
@@ -62,6 +73,7 @@ const MakeAppointment: React.FC = () => {
   return (
     <div className="container">
       <h4 className="my-3">Book an Appointment</h4>
+
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <label>MR No:</label>
@@ -121,7 +133,9 @@ const MakeAppointment: React.FC = () => {
             required
           >
             <option value="">Select Department</option>
-            {/* Add dynamic departments here */}
+            <option value="1">Cardiology</option>
+            <option value="2">Neurology</option>
+            <option value="3">Orthopedics</option>
           </select>
         </div>
 
@@ -135,7 +149,9 @@ const MakeAppointment: React.FC = () => {
             required
           >
             <option value="">Select Consultant</option>
-            {/* Add dynamic consultants here */}
+            <option value="1">Dr Ahmed</option>
+            <option value="2">Dr Ali</option>
+            <option value="3">Dr Khan</option>
           </select>
         </div>
 
