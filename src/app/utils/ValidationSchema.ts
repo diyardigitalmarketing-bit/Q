@@ -171,13 +171,12 @@ export const makeAppointmentSchema = z.object({
     consultant_id: z
         .string()
         .min(1, "Consultant is required"),
-
-    // ✅ ONLY CHANGE DONE HERE
-    message: z
+        patient_category: z
         .string()
-        .optional()
-        .or(z.literal(''))
+        .min(1, "Patient category is required")
+   
 })
+
 
 export type MakeAppointmentSchema = z.infer<typeof makeAppointmentSchema>
 

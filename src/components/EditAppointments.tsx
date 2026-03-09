@@ -24,7 +24,7 @@ interface Appointment {
     appointment_datetime: string
     department_id: string
     consultant_id: string
-    message: string
+    patient_category: string // ✅ replaced message with patient_category
   }
 }
 

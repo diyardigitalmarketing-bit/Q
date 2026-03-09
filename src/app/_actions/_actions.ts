@@ -438,7 +438,6 @@ export const UploadPublicFileAction = async (formData: FormData) => {
         return error
     }
 }
-
 export const MakeAppointmentAction = async (formData: FormData) => {
     const token = (await cookies()).get('token')?.value
     const mr_no = formData.get('mr_no')
@@ -447,7 +446,8 @@ export const MakeAppointmentAction = async (formData: FormData) => {
     const appointment_datetime = formData.get('appointment_dateTime')
     const department_id = Number(formData.get('department_id'))
     const consultant_id = Number(formData.get('consultant_id'))
-    const message = formData.get('message')
+    const patient_category = formData.get('patient_category') // ✅ added
+
     try {
         const response = await fetch(`${url}appointments`, {
             method: 'POST',
@@ -463,7 +463,7 @@ export const MakeAppointmentAction = async (formData: FormData) => {
                 appointment_datetime,
                 department_id,
                 consultant_id,
-                message
+                patient_category // ✅ send instead of message
             })
         })
         const data = await response.json();
@@ -480,7 +480,7 @@ export const MakePublicAppointmentAction = async (formData: FormData) => {
     const appointment_datetime = formData.get('appointment_dateTime')
     const department_id = Number(formData.get('department_id'))
     const consultant_id = Number(formData.get('consultant_id'))
-    const message = formData.get('message')
+    const patient_category = formData.get('patient_category') // ✅ added
 
     try {
         const response = await fetch(`${url}public/appointments`, {
@@ -496,7 +496,7 @@ export const MakePublicAppointmentAction = async (formData: FormData) => {
                 appointment_datetime,
                 department_id,
                 consultant_id,
-                message
+                patient_category // ✅ send instead of message
             })
         })
         const data = await response.json();
@@ -505,6 +505,7 @@ export const MakePublicAppointmentAction = async (formData: FormData) => {
         return error
     }
 }
+
 export const EditAppointmentAction = async (id: number, formData: FormData) => {
     const token = (await cookies()).get('token')?.value
     const mr_no = formData.get('mr_no')
@@ -513,7 +514,8 @@ export const EditAppointmentAction = async (id: number, formData: FormData) => {
     const appointment_datetime = formData.get('appointment_dateTime')
     const department_id = Number(formData.get('department_id'))
     const consultant_id = Number(formData.get('consultant_id'))
-    const message = formData.get('message')
+    const patient_category = formData.get('patient_category') // ✅ added
+
     try {
         const response = await fetch(`${url}appointments/${id}`, {
             method: 'PUT',
@@ -529,7 +531,7 @@ export const EditAppointmentAction = async (id: number, formData: FormData) => {
                 appointment_datetime,
                 department_id,
                 consultant_id,
-                message
+                patient_category // ✅ send instead of message
             })
         })
         const data = await response.json();
