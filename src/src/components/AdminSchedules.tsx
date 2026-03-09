@@ -1,4 +1,5 @@
 'use client'
+
 import React, { useEffect, useRef, useState } from 'react'
 import { Calendar } from '@fullcalendar/core'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -17,11 +18,18 @@ interface AvailabilityEvent {
 
 interface AvailabilityCalendarProps {
   consultantId: number
+  onUpdateAvailability?: (
+    events: AvailabilityEvent[],
+    examineDuration: string
+  ) => Promise<void>
 }
 
-const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ consultantId }) => {
+const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
+  consultantId,
+  onUpdateAvailability
+}) => {
   const [availableSchedule, setAvailableSchedule] = useState<AvailabilityEvent[]>([])
-  const [examineDuration, setExamineDuration] = useState('30') // default duration
+  const [examineDuration, setExamineDuration] = useState('30')
   const [loading, setLoading] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<EventApi | null>(null)
   const [showContextMenu, setShowContextMenu] = useState(false)
@@ -30,7 +38,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ consul
   const calendarRef = useRef<HTMLDivElement>(null)
   const calendarInstanceRef = useRef<Calendar | null>(null)
 
-  // Fetch saved schedule from backend
+  // Fetch schedule from backend
   const getSchedule = async () => {
     setLoading(true)
     try {
@@ -53,8 +61,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ consul
   useEffect(() => {
     if (!calendarRef.current) return
 
-    const calendarEl = calendarRef.current
-    const calendar = new Calendar(calendarEl, {
+    const calendar = new Calendar(calendarRef.current, {
       plugins: [timeGridPlugin, interactionPlugin],
       events: availableSchedule,
       initialView: 'timeGridWeek',
@@ -64,15 +71,15 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ consul
       eventResizableFromStart: true,
       headerToolbar: false,
       timeZone: 'Asia/Karachi',
-      slotDuration: '00:05:00', // grid every 5 min
-      snapDuration: '00:01:00', // snap events every 1 min
+      slotDuration: '00:05:00',
+      snapDuration: '00:01:00',
       slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
       initialDate: new Date(),
 
       // Add new slot dynamically
       select: (info: DateSelectArg) => {
-        const durationInMinutes = parseInt(examineDuration) || 30
-        const endDate = new Date(info.start.getTime() + durationInMinutes * 60 * 1000)
+        const duration = parseInt(examineDuration) || 30
+        const endDate = new Date(info.start.getTime() + duration * 60 * 1000)
 
         const newEvent = calendar.addEvent({
           title: 'Availability',
@@ -82,6 +89,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ consul
           backgroundColor: '#01306f',
           borderColor: '#01306f',
         })
+
         calendar.unselect()
         if (newEvent) mergeOverlappingEvents(newEvent)
       },
@@ -90,6 +98,10 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ consul
       eventResize: (info: EventResizeDoneArg) => mergeOverlappingEvents(info.event),
 
       eventDidMount: (info) => {
+        // Highlight saved events
+        info.el.style.backgroundColor = '#01306f'
+        info.el.style.borderColor = '#01306f'
+
         info.el.addEventListener('contextmenu', (e) => {
           e.preventDefault()
           setSelectedEvent(info.event)
@@ -99,7 +111,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ consul
       },
     })
 
-    // Merge overlapping events automatically
+    // Merge overlapping events
     const mergeOverlappingEvents = (newEvent: EventApi) => {
       const events = calendar.getEvents()
       let mergedStart = newEvent.start as Date
@@ -133,14 +145,12 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ consul
     return () => calendar.destroy()
   }, [availableSchedule, examineDuration])
 
-  // Hide context menu when clicking anywhere
   useEffect(() => {
     const handleClick = () => setShowContextMenu(false)
     document.addEventListener('click', handleClick)
     return () => document.removeEventListener('click', handleClick)
   }, [])
 
-  // Delete selected event
   const handleDeleteEvent = () => {
     if (selectedEvent) {
       selectedEvent.remove()
@@ -149,27 +159,31 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ consul
     }
   }
 
-  // Save events to backend
+  // Save events
   const handleSaveEvents = async () => {
     if (!calendarInstanceRef.current) return
-    const events = calendarInstanceRef.current.getEvents().map((event) => ({
+
+    const events: AvailabilityEvent[] = calendarInstanceRef.current.getEvents().map((event) => ({
       title: event.title,
-      start: event.start,
-      end: event.end,
+      start: event.start as Date,
+      end: event.end as Date,
       user_id: consultantId,
     }))
 
     try {
-      const res = await fetch('/api/saveSchedule', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          consultantId,
-          examine_duration: examineDuration,
-          schedule_days: events,
-        }),
-      })
-      if (!res.ok) throw new Error('Failed to save schedule')
+      if (onUpdateAvailability) {
+        await onUpdateAvailability(events, examineDuration)
+      } else {
+        await fetch('/api/saveSchedule', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            consultantId,
+            examine_duration: examineDuration,
+            schedule_days: events,
+          }),
+        })
+      }
       toast.success('Availability saved successfully!')
     } catch (err) {
       console.error(err)
@@ -200,13 +214,16 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({ consul
         </div>
       </div>
 
-      <div ref={calendarRef} id="calendar" className="w-100 h-100"></div>
+      <div ref={calendarRef} id="calendar" className="w-100" style={{ height: '650px' }} />
 
-      {/* Context Menu */}
       {showContextMenu && (
         <div
-          className="position-absolute p-2 rounded z-3 bg-white shadow"
-          style={{ left: `${contextMenuPosition.left}px`, top: `${contextMenuPosition.top}px` }}
+          className="position-absolute p-2 rounded bg-white shadow"
+          style={{
+            left: `${contextMenuPosition.left}px`,
+            top: `${contextMenuPosition.top}px`,
+            zIndex: 999,
+          }}
         >
           <button className="btn btn-danger btn-sm" onClick={handleDeleteEvent}>
             Delete Event
