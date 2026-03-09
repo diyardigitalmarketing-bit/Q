@@ -4,23 +4,23 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Calendar } from '@fullcalendar/core'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import type { EventApi, DateSelectArg, EventDropArg } from '@fullcalendar/core'
+
+import type {
+  EventApi,
+  DateSelectArg,
+  EventDropArg,
+  EventInput,
+} from '@fullcalendar/core'
+
 import { EventResizeDoneArg } from '@fullcalendar/interaction'
 
 import { getAdminConsultantSchedule } from '@/app/lib/getSchedules'
 import Loader from './Loader'
 
-interface AvailabilityEvent {
-  id?: string
-  title?: string
-  start: string | Date
-  end: string | Date | null
-}
-
 interface AvailabilityCalendarProps {
   consultantId: number
   onUpdateAvailability?: (
-    events: AvailabilityEvent[],
+    events: EventInput[],
     examineDuration: string
   ) => void
 }
@@ -33,7 +33,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   const calendarRef = useRef<HTMLDivElement>(null)
   const calendarInstanceRef = useRef<Calendar | null>(null)
 
-  const [availableSchedule, setAvailableSchedule] = useState<AvailabilityEvent[]>([])
+  const [availableSchedule, setAvailableSchedule] = useState<EventInput[]>([])
   const [selectedEvent, setSelectedEvent] = useState<EventApi | null>(null)
   const [showContextMenu, setShowContextMenu] = useState(false)
   const [contextMenuPosition, setContextMenuPosition] = useState({ left: 0, top: 0 })
@@ -47,17 +47,19 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   }
 
   const getSchedule = async () => {
+
     try {
+
       setLoading(true)
 
       const res = await getAdminConsultantSchedule(consultantId)
 
-      const events =
+      const events: EventInput[] =
         res.schedule_days?.map((item: any) => ({
           id: crypto.randomUUID(),
           title: 'Availability',
           start: item.start,
-          end: item.end,
+          end: item.end ?? undefined,
           backgroundColor: '#01306f',
           borderColor: '#01306f',
         })) || []
@@ -71,7 +73,9 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
       setAvailableSchedule([])
 
     } finally {
+
       setLoading(false)
+
     }
   }
 
@@ -84,6 +88,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     if (!calendarRef.current) return
 
     const calendar = new Calendar(calendarRef.current, {
+
       plugins: [timeGridPlugin, interactionPlugin],
       initialView: 'timeGridWeek',
       editable: true,
@@ -129,8 +134,11 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
           })
 
           setShowContextMenu(true)
+
         })
+
       },
+
     })
 
     const mergeOverlappingEvents = (newEvent: EventApi) => {
@@ -155,8 +163,11 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
             )
 
             event.remove()
+
           }
+
         }
+
       })
 
       newEvent.remove()
@@ -169,6 +180,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
         backgroundColor: '#01306f',
         borderColor: '#01306f',
       })
+
     }
 
     calendarInstanceRef.current = calendar
@@ -203,31 +215,36 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   }, [])
 
   const handleDeleteEvent = () => {
+
     selectedEvent?.remove()
     setSelectedEvent(null)
     setShowContextMenu(false)
+
   }
 
   const handleSaveEvents = async () => {
 
     if (!calendarInstanceRef.current) return
 
-    const events = calendarInstanceRef.current.getEvents().map((event) => ({
-      title: event.title,
-      start: event.start,
-      end: event.end,
-    }))
+    const events: EventInput[] =
+      calendarInstanceRef.current.getEvents().map((event) => ({
+        title: event.title,
+        start: event.start!,
+        end: event.end ?? undefined,
+      }))
 
     if (onUpdateAvailability) {
-      await onUpdateAvailability(events as AvailabilityEvent[], examineDuration)
+      await onUpdateAvailability(events, examineDuration)
     }
 
     getSchedule()
+
   }
 
   if (loading) return <Loader />
 
   return (
+
     <div className="position-relative w-100">
 
       <h3 className="mb-3">Set Your Availability</h3>
@@ -257,6 +274,7 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
       />
 
       {showContextMenu && (
+
         <div
           className="position-absolute bg-white p-2 shadow rounded"
           style={{
@@ -265,17 +283,22 @@ const AdminAvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
             zIndex: 1000,
           }}
         >
+
           <button
             className="btn btn-danger btn-sm"
             onClick={handleDeleteEvent}
           >
             Delete Event
           </button>
+
         </div>
+
       )}
 
     </div>
+
   )
+
 }
 
 export default AdminAvailabilityCalendar
