@@ -1,39 +1,38 @@
 import bcrypt from "bcryptjs"
 
-export async function initializeReceptionist() {
+const DEFAULT_USER = {
+  email: "receptionist@qih.com",
+  // hashed version of 123456
+  password: "$2a$10$7QJQmZCj7FVGHvXZHzVvzOv9q24apqYh6gMPkTFogyXv3gZH/BqhG",
+  name: "Receptionist",
+  role: "receptionist"
+}
+
+export async function loginUser(email: string, password: string) {
   try {
-    const email = "receptionist@qih.com"
-    const password = "123456"
-
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    })
-
-    if (!existingUser) {
-      const hashedPassword = await bcrypt.hash(password, 10)
-
-      await prisma.user.create({
-        data: {
-          name: "Receptionist",
-          email: email,
-          password: hashedPassword,
-          roles: {
-            create: [
-              {
-                name: "receptionist"
-              }
-            ]
-          }
-        }
-      })
-
-      console.log("✅ Default Receptionist Created")
-      console.log("Email: receptionist@qih.com")
-      console.log("Password: 123456")
-    } else {
-      console.log("Receptionist already exists")
+    // check email
+    if (email !== DEFAULT_USER.email) {
+      return { success: false, message: "Invalid email or password" }
     }
+
+    // check password
+    const passwordMatch = await bcrypt.compare(password, DEFAULT_USER.password)
+
+    if (!passwordMatch) {
+      return { success: false, message: "Invalid email or password" }
+    }
+
+    return {
+      success: true,
+      user: {
+        name: DEFAULT_USER.name,
+        email: DEFAULT_USER.email,
+        role: DEFAULT_USER.role
+      }
+    }
+
   } catch (error) {
-    console.error("Error creating receptionist:", error)
+    console.error("Login error:", error)
+    return { success: false, message: "Login failed" }
   }
 }
