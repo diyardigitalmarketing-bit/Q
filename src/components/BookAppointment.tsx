@@ -64,7 +64,7 @@ const BookAppointment = ({
     department_id: departmentId?.toString(),
     consultant_id: consultantId?.toString(),
     patient_category: '', // 👈 added
-    message: '',
+    
   })
 
   const [errors, setErrors] = useState<{
@@ -195,7 +195,7 @@ const BookAppointment = ({
           department_id: '',
           consultant_id: '',
           patient_category: '',
-          message: '',
+         
         })
       } else {
         toast.error(res.message)

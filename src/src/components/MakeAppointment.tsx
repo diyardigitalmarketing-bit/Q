@@ -40,7 +40,6 @@ const MakeAppointment = () => {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<Date | null>(null)
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([])
   const [allowedDays, setAllowedDays] = useState<number[]>([])
-  const [allowedTimes, setAllowedTimes] = useState<string[]>([])
   const [examineDuration, setExamineDuration] = useState<number>()
   const [formatedDate, setFormatedDate] = useState<string>('')
   const today = new Date()
@@ -63,7 +62,7 @@ const MakeAppointment = () => {
     appointment_dateTime: '',
     department_id: '',
     consultant_id: '',
-    message: '',
+    patient_category: '', // ✅ added patient_category
   })
 
   const [errors, setErrors] = useState<{
@@ -103,11 +102,9 @@ const MakeAppointment = () => {
   const getDaysOfWork = async (consultantId: number) => {
     if (!consultantId) return
     setLoading(true)
-    // const res = await getConsultantSchedules(consultantId)
     const res = await getPublicConsultantSchedules(consultantId)
     setAvailableWeekDays(res?.data?.days_at_work)
     setExamineDuration(res?.data?.examine_duration)
-
     setAllowedDays(
       res?.data?.days_at_work?.map(
         (day: keyof typeof dayNameToNumber) => dayNameToNumber[day]
@@ -131,11 +128,10 @@ const MakeAppointment = () => {
   }
 
   const handleDateChange = (date: Date | null) => {
-    const dateStr = date
-    const dateObj = new Date(dateStr!)
-    const year = dateObj.getFullYear()
-    const month = ('0' + (dateObj.getMonth() + 1)).slice(-2)
-    const day = ('0' + dateObj.getDate()).slice(-2)
+    if (!date) return
+    const year = date.getFullYear()
+    const month = ('0' + (date.getMonth() + 1)).slice(-2)
+    const day = ('0' + date.getDate()).slice(-2)
     const formattedDate = `${year}-${month}-${day}`
     setFormatedDate(formattedDate)
     setSelectedDate(date)
@@ -150,17 +146,11 @@ const MakeAppointment = () => {
     })
   }
 
-  const filterTime = (time: Date) => {
-    const formattedTime = formatTime(time)
-    return availableTimeSlots.includes(formattedTime)
-  }
-
   const handleTimeChange = (date: Date | null) => {
-    const selectedStr = date
-    const selectedObj = new Date(selectedStr!)
-    const hours = selectedObj.getHours().toString().padStart(2, '0')
-    const minutes = selectedObj.getMinutes().toString().padStart(2, '0')
-    const seconds = selectedObj.getSeconds().toString().padStart(2, '0')
+    if (!date) return
+    const hours = date.getHours().toString().padStart(2, '0')
+    const minutes = date.getMinutes().toString().padStart(2, '0')
+    const seconds = date.getSeconds().toString().padStart(2, '0')
     const formatedTime = `${hours}:${minutes}:${seconds}`
     setSelectedTimeSlot(date)
     const concatedDateTime = `${formatedDate} ${formatedTime}`
@@ -169,15 +159,6 @@ const MakeAppointment = () => {
       appointment_dateTime: concatedDateTime,
     })
   }
-
-  useEffect(() => {
-    if (selectedDate && myForm.consultant_id) {
-      const dateStr = format(selectedDate, 'yyyy-MM-dd')
-      getSlotsByDate(+myForm.consultant_id, dateStr)
-        .then((res) => setAvailableTimeSlots(res.data))
-        .finally(() => setLoading(false))
-    }
-  }, [selectedDate, myForm.consultant_id])
 
   const timesForPicker = useMemo(() => {
     if (!selectedDate) return []
@@ -225,7 +206,8 @@ const MakeAppointment = () => {
       formData.append('appointment_dateTime', formatteddateTime)
       formData.append('department_id', result.data.department_id)
       formData.append('consultant_id', result.data.consultant_id)
-      formData.append('patient_category', result.data.patient_category)
+      formData.append('patient_category', result.data.patient_category) // ✅ added
+
       const res = await MakePublicAppointmentAction(formData)
       if (res.status === 'success') {
         setLoading(false)
@@ -237,8 +219,7 @@ const MakeAppointment = () => {
           appointment_dateTime: '',
           department_id: '',
           consultant_id: '',
-          message: '',
-          patient_category:'', 
+          patient_category: '', // ✅ reset field
         })
       } else {
         setLoading(false)
@@ -266,6 +247,7 @@ const MakeAppointment = () => {
         </p>
         <form onSubmit={handleSubmit}>
           <div className="row">
+            {/* Department */}
             <div className="col-12 col-md-6">
               <div className="select-holder">
                 <select
@@ -293,6 +275,8 @@ const MakeAppointment = () => {
                 <div className="badge">department</div>
               </div>
             </div>
+
+            {/* Consultant */}
             <div className="col-12 col-md-6">
               <div className="select-holder">
                 <select
@@ -320,9 +304,11 @@ const MakeAppointment = () => {
                 <div className="badge">choose doctor</div>
               </div>
             </div>
+
+            {/* Date & Time */}
             <div className="col-12 col-md-12 col-lg-6">
               <div className="row">
-                <div className="col-6 ">
+                <div className="col-6">
                   <DatePicker
                     selected={selectedDate}
                     onChange={handleDateChange}
@@ -332,10 +318,10 @@ const MakeAppointment = () => {
                     placeholderText="Select an available date"
                     dateFormat="yyyy-MM-dd"
                     wrapperClassName="w-100"
-                    className="form-control "
+                    className="form-control"
                   />
                 </div>
-                <div className="col-6 ">
+                <div className="col-6">
                   <select
                     className="form-control"
                     value={
@@ -365,6 +351,7 @@ const MakeAppointment = () => {
               )}
             </div>
 
+            {/* MR No */}
             <div className="col-12 col-md-12 col-lg-6">
               <input
                 className="form-control"
@@ -376,6 +363,8 @@ const MakeAppointment = () => {
               />
               {errors.mr_no && <p className="text-danger">{errors.mr_no}</p>}
             </div>
+
+            {/* Patient Name */}
             <div className="col-12 col-md-12 col-lg-6">
               <input
                 className="form-control"
@@ -389,6 +378,8 @@ const MakeAppointment = () => {
                 <p className="text-danger">{errors.patient_name}</p>
               )}
             </div>
+
+            {/* Mobile No */}
             <div className="col-12 col-md-6 col-lg-6">
               <input
                 className="form-control"
@@ -403,7 +394,26 @@ const MakeAppointment = () => {
               )}
             </div>
 
-           
+            {/* Patient Category */}
+            <div className="col-12 col-md-6 col-lg-6">
+              <div className="select-holder">
+                <select
+                  className="form-control"
+                  name="patient_category"
+                  value={myForm.patient_category || ''}
+                  onChange={handleChange}
+                >
+                  <option value="">Select Patient Category</option>
+                  <option value="New">New</option>
+                  <option value="Follow Up">Follow Up</option>
+                  <option value="Emergency">Emergency</option>
+                </select>
+                {errors.patient_category && (
+                  <p className="text-danger">{errors.patient_category}</p>
+                )}
+                <div className="badge">Patient Category</div>
+              </div>
+            </div>
 
             <div className="col-12">
               <button
@@ -412,7 +422,6 @@ const MakeAppointment = () => {
                 style={{ width: '200px' }}
               >
                 <span className="line">
-                  {' '}
                   <span> </span>
                 </span>
                 <span>make appointment</span>

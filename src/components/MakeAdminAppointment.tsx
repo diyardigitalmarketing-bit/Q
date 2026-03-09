@@ -10,7 +10,6 @@ import {
 } from '@/app/utils/ValidationSchema'
 import React, { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
-//import DateTimePicker from 'react-datetime-picker'
 import { getDepartments } from '@/app/lib/getDepartments'
 import Loader from './Loader'
 import { formatDateTime } from '@/app/utils/helper'
@@ -60,7 +59,7 @@ const MakeAdminAppointment = () => {
     appointment_dateTime: '',
     department_id: '',
     consultant_id: '',
-    message: '',
+    patient_category: '', // ✅ added patient_category
   })
 
   const [errors, setErrors] = useState<{
@@ -184,9 +183,7 @@ const MakeAdminAppointment = () => {
       if (mod === 'PM' && h < 12) h += 12
       if (mod === 'AM' && h === 12) h = 0
 
-      // Create a new date object with the correct date
       const dt = new Date(selectedDate)
-      // Set hours and minutes
       dt.setHours(h)
       dt.setMinutes(m)
       dt.setSeconds(0)
@@ -221,6 +218,8 @@ const MakeAdminAppointment = () => {
       formData.append('appointment_dateTime', formatteddateTime)
       formData.append('department_id', result.data.department_id)
       formData.append('consultant_id', result.data.consultant_id)
+      formData.append('patient_category', result.data.patient_category) // ✅ added
+
       const res = await MakeAppointmentAction(formData)
       if (res.status === 'success') {
         setLoading(false)
@@ -232,7 +231,7 @@ const MakeAdminAppointment = () => {
           appointment_dateTime: '',
           department_id: '',
           consultant_id: '',
-          message: '',
+          patient_category: '', // ✅ reset field
         })
       } else {
         setLoading(false)
@@ -314,6 +313,7 @@ const MakeAdminAppointment = () => {
                 <div className="badge">choose doctor</div>
               </div>
             </div>
+
             <div className="col-12 col-md-12 col-lg-6">
               <div className="row">
                 <div className="col-6 ">
@@ -358,6 +358,7 @@ const MakeAdminAppointment = () => {
                 <p className="text-danger">{errors.appointment_dateTime}</p>
               )}
             </div>
+
             <div className="col-12 col-md-12 col-lg-6">
               <input
                 className="form-control"
@@ -396,17 +397,24 @@ const MakeAdminAppointment = () => {
               )}
             </div>
 
-            <div className="col-12 ">
-              <textarea
-                className="form-control"
-                name="message"
-                value={myForm.message}
-                onChange={handleChange}
-                placeholder="Message"
-              ></textarea>
-              {errors.message && (
-                <p className="text-danger">{errors.message}</p>
-              )}
+            <div className="col-12 col-md-6 col-lg-6">
+              <div className="select-holder">
+                <select
+                  className="form-control"
+                  name="patient_category"
+                  value={myForm.patient_category || ''}
+                  onChange={handleChange}
+                >
+                  <option value="">Select Patient Category</option>
+                  <option value="New">New</option>
+                  <option value="Follow Up">Follow Up</option>
+                  <option value="Emergency">Emergency</option>
+                </select>
+                {errors.patient_category && (
+                  <p className="text-danger">{errors.patient_category}</p>
+                )}
+                <div className="badge">Patient Category</div>
+              </div>
             </div>
 
             <div className="col-12">
@@ -416,7 +424,6 @@ const MakeAdminAppointment = () => {
                 style={{ width: '200px' }}
               >
                 <span className="line">
-                  {' '}
                   <span> </span>
                 </span>
                 <span>make appointment</span>
