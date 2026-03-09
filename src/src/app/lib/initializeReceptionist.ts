@@ -1,39 +1,44 @@
-// frontend-only login (no backend)
-type LoginResult =
-  | {
-      success: true
-      user: {
-        name: string
-        email: string
-        role: string
-      }
-    }
-  | {
-      success: false
-      message: string
-    }
+// Frontend-only authentication utility
 
-// Hardcoded user
+export type User = {
+  name: string
+  email: string
+  role: string
+}
+
+export type LoginResult =
+  | { success: true; user: User }
+  | { success: false; message: string }
+
+// Hardcoded receptionist account
 const DEFAULT_USER = {
   email: "receptionist@qih.com",
-  password: "123456", // plain password for frontend
+  password: "123456",
   name: "Receptionist",
   role: "receptionist",
 }
 
-export function loginUser(
-  email: string,
-  password: string
-): LoginResult {
-  email = email.trim()
-  password = password.trim()
+// Login function
+export function loginUser(email: string, password: string): LoginResult {
 
-  if (!email || !password) {
-    return { success: false, message: "Email and password required" }
+  const cleanEmail = email.trim()
+  const cleanPassword = password.trim()
+
+  if (!cleanEmail || !cleanPassword) {
+    return {
+      success: false,
+      message: "Email and password required",
+    }
   }
 
-  if (email !== DEFAULT_USER.email || password !== DEFAULT_USER.password) {
-    return { success: false, message: "Invalid email or password" }
+  if (
+    cleanEmail !== DEFAULT_USER.email ||
+    cleanPassword !== DEFAULT_USER.password
+  ) {
+    return {
+      success: false,
+      message: "Invalid email or password",
+    }
   }
 
   return {
@@ -46,6 +51,31 @@ export function loginUser(
   }
 }
 
-// Example usage:
-const result = loginUser("receptionist@qih.com", "123456")
-console.log(result)
+// Save login session
+export function saveUserSession(user: User) {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("user", JSON.stringify(user))
+  }
+}
+
+// Get logged-in user
+export function getUserSession(): User | null {
+  if (typeof window === "undefined") return null
+
+  const storedUser = localStorage.getItem("user")
+
+  if (!storedUser) return null
+
+  try {
+    return JSON.parse(storedUser)
+  } catch {
+    return null
+  }
+}
+
+// Logout function
+export function logoutUser() {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("user")
+  }
+}
