@@ -16,7 +16,6 @@ type LoginResult =
 
 const DEFAULT_USER = {
   email: "receptionist@qih.com",
-  // password = 123456
   password: "$2a$10$7QJQmZCj7FVGHvXZHzVvzOv9q24apqYh6gMPkTFogyXv3gZH/BqhG",
   name: "Receptionist",
   role: "receptionist"
@@ -57,4 +56,8 @@ export async function loginUser(
       message: "Login failed"
     }
   }
+}
+
+export function initializeReceptionist() {
+  console.log("Receptionist initialized")
 }
