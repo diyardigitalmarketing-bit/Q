@@ -36,18 +36,21 @@ export function middleware(req: NextRequest) {
         return NextResponse.next();
     }
 
-    // For receptionist users: redirect login/register to /receptionist-dashboard, block admin/consultant.
-    if (userRole === 'receptionist') {
-        if (pathname.startsWith('/admin') || pathname.startsWith('/consultant-dashboard')) {
-            url.pathname = '/Receptionist';
-            return NextResponse.redirect(url);
-        }
-        if (pathname === '/login' || pathname === '/register') {
-            url.pathname = '/Receptionist';
-            return NextResponse.redirect(url);
-        }
-        return NextResponse.next();
+ // For receptionist users: redirect to /Receptionist, block admin/consultant
+// For receptionist users: redirect to /Receptionist, block admin/consultant
+if (userRole === 'receptionist') {
+    if (pathname.startsWith('/admin') || pathname.startsWith('/consultant-dashboard')) {
+        url.pathname = '/Receptionist';  
+        return NextResponse.redirect(url);
     }
+    if (pathname === '/login' || pathname === '/register') {
+        url.pathname = '/Receptionist';  
+        return NextResponse.redirect(url);
+    }
+    return NextResponse.next();
+}
+
+
 
     // For patient users: block admin/consultant/receptionist, redirect login to home.
     if (userRole === 'patient') {

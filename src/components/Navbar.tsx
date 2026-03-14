@@ -107,7 +107,7 @@ const Navbar = ({ token, user }: { token: string; user: User | null }) => {
   if (roleName === 'admin') return '/admin'
   if (roleName === 'consultant') return '/consultant-dashboard'
   if (roleName === 'patient') return '/patient-dashboard'
-  if (roleName === 'receptionist') return '/receptionist-dashboard'
+  if (roleName === 'Receptionist') return '/Receptionist'
 
   return '#'
 }

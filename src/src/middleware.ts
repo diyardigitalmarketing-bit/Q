@@ -8,47 +8,62 @@ export function middleware(req: NextRequest) {
 
     // If the user is not logged in:
     if (!userRole) {
-        // Prevent access to /admin and /consultant-dashboard routes.
-        if (pathname.startsWith('/admin') || pathname.startsWith('/consultant-dashboard')) {
+        // Prevent access to protected routes.
+        if (pathname.startsWith('/admin') || 
+            pathname.startsWith('/consultant-dashboard') || 
+            pathname.startsWith('/receptionist-dashboard')) {
             url.pathname = '/login';
             return NextResponse.redirect(url);
         }
         return NextResponse.next();
     }
 
-    // For admin users: when on the login page (or root) redirect to /admin.
+    // For admin users: redirect login/register to /admin, allow everywhere.
     if (userRole === 'admin') {
         if (pathname === '/login' || pathname === '/register') {
             url.pathname = '/admin';
             return NextResponse.redirect(url);
         }
-        // Allow admin to navigate anywhere.
         return NextResponse.next();
     }
 
-    // For consultant users: when on the login page (or root) redirect to /consultant-dashboard.
+    // For consultant users: redirect login/register to /consultant-dashboard, allow everywhere.
     if (userRole === 'consultant') {
         if (pathname === '/login' || pathname === '/register') {
             url.pathname = '/consultant-dashboard';
             return NextResponse.redirect(url);
         }
-        // Allow consultant to navigate anywhere.
         return NextResponse.next();
     }
 
-    // For patient users:
+ // For receptionist users: redirect to /Receptionist, block admin/consultant
+// For receptionist users: redirect to /Receptionist, block admin/consultant
+if (userRole === 'receptionist') {
+    if (pathname.startsWith('/admin') || pathname.startsWith('/consultant-dashboard')) {
+        url.pathname = '/Receptionist';  
+        return NextResponse.redirect(url);
+    }
+    if (pathname === '/login' || pathname === '/register') {
+        url.pathname = '/Receptionist';  
+        return NextResponse.redirect(url);
+    }
+    return NextResponse.next();
+}
+
+
+
+    // For patient users: block admin/consultant/receptionist, redirect login to home.
     if (userRole === 'patient') {
-        // Prevent access to /admin and /consultant-dashboard routes.
-        if (pathname.startsWith('/admin') || pathname.startsWith('/consultant-dashboard')) {
+        if (pathname.startsWith('/admin') || 
+            pathname.startsWith('/consultant-dashboard') || 
+            pathname.startsWith('/receptionist-dashboard')) {
             url.pathname = '/';
             return NextResponse.redirect(url);
         }
-        // When on the login page, redirect to home page.
         if (pathname === '/login' || pathname === '/register') {
             url.pathname = '/';
             return NextResponse.redirect(url);
         }
-        // Allow access to all other routes.
         return NextResponse.next();
     }
 
