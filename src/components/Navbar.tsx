@@ -148,7 +148,7 @@ const Navbar = ({ token, user }: { token: string; user: User | null }) => {
             {/* === Book an Appointment === */}
            <li className="nav-item">
   <Link
-    href="/make-appointment"
+    href="https://qih.diyartechs.com/form/appointment"
     className="nav-link fw-bold"
     style={{ color: 'red' }}
     onClick={closeAllMenus}
@@ -828,5 +828,7 @@ const Navbar = ({ token, user }: { token: string; user: User | null }) => {
     </header>
   )
 }
+
+export default Navbar
 
 export default Navbar
