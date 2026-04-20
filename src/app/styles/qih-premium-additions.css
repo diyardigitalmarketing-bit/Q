@@ -1,0 +1,301 @@
+/* ============================================================
+   QIH PREMIUM UPGRADE — Global CSS Additions
+   Add this to the bottom of: src/app/styles/style.css
+   ============================================================ */
+
+/* ─── CSS Custom Properties ─────────────────────────────── */
+:root {
+  --qih-navy:       #0e8219;
+  --qih-navy-dark:  #1a1a1a;
+  --qih-red:        #0e8219;
+  --qih-red-hover:  #0a6b14;
+  --qih-text:       #1a1a1a;
+  --qih-text-muted: #6b7c8d;
+  --qih-border:     #e8ecf0;
+  --qih-bg-light:   #f8fafd;
+
+  --qih-radius-sm:  8px;
+  --qih-radius-md:  12px;
+  --qih-radius-lg:  16px;
+  --qih-radius-xl:  24px;
+  --qih-radius-pill: 50px;
+
+  --qih-shadow-sm:  0 2px 10px rgba(10,30,50,0.06);
+  --qih-shadow-md:  0 8px 30px rgba(10,30,50,0.10);
+  --qih-shadow-lg:  0 16px 56px rgba(10,30,50,0.14);
+
+  --qih-transition: 0.2s ease;
+}
+
+/* ─── Typography upgrade ─────────────────────────────────── */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--qih-text);
+  line-height: 1.65;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.3px;
+  line-height: 1.25;
+}
+
+/* ─── Button upgrades ───────────────────────────────────── */
+.btn-primary,
+a.btn-primary {
+  background: var(--qih-red) !important;
+  border-color: var(--qih-red) !important;
+  border-radius: var(--qih-radius-pill) !important;
+  font-weight: 600 !important;
+  padding: 11px 26px !important;
+  transition: background var(--qih-transition), transform var(--qih-transition) !important;
+  letter-spacing: 0.1px !important;
+}
+.btn-primary:hover,
+a.btn-primary:hover {
+  background: var(--qih-red-hover) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(192,57,43,0.3) !important;
+}
+
+.btn-secondary,
+a.btn-secondary {
+  border-radius: var(--qih-radius-pill) !important;
+  font-weight: 600 !important;
+}
+
+/* ─── Card upgrades ─────────────────────────────────────── */
+.card,
+.cs-card,
+.feature-panel {
+  border-radius: var(--qih-radius-lg) !important;
+  border: 1px solid var(--qih-border) !important;
+  box-shadow: var(--qih-shadow-sm) !important;
+  transition: box-shadow var(--qih-transition), transform var(--qih-transition) !important;
+  overflow: hidden;
+}
+.card:hover,
+.cs-card:hover {
+  box-shadow: var(--qih-shadow-md) !important;
+  transform: translateY(-3px) !important;
+}
+
+/* ─── Section spacing ───────────────────────────────────── */
+section {
+  padding-top: 80px;
+  padding-bottom: 80px;
+}
+
+/* ─── Section headings ──────────────────────────────────── */
+.section-heading h2,
+.heading h2 {
+  font-size: clamp(26px, 3vw, 38px) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.5px !important;
+  color: var(--qih-text) !important;
+}
+
+/* ─── Form inputs ───────────────────────────────────────── */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="search"],
+select,
+textarea {
+  border-radius: var(--qih-radius-md) !important;
+  border: 1.5px solid var(--qih-border) !important;
+  padding: 12px 16px !important;
+  font-size: 14.5px !important;
+  transition: border-color var(--qih-transition), box-shadow var(--qih-transition) !important;
+  background: #fff !important;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--qih-navy) !important;
+  box-shadow: 0 0 0 3px rgba(10,61,107,0.1) !important;
+  outline: none !important;
+}
+
+/* ─── Tables ─────────────────────────────────────────────── */
+table {
+  border-radius: var(--qih-radius-md);
+  overflow: hidden;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+thead th {
+  background: var(--qih-navy) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.3px !important;
+  padding: 14px 16px !important;
+  border: none !important;
+}
+tbody tr:hover {
+  background: var(--qih-bg-light) !important;
+}
+tbody td {
+  padding: 12px 16px !important;
+  border-bottom: 1px solid var(--qih-border) !important;
+  font-size: 14px !important;
+}
+
+/* ─── Breadcrumbs ───────────────────────────────────────── */
+.breadcrumb {
+  background: transparent !important;
+  padding: 0 !important;
+}
+.breadcrumb-item a {
+  color: var(--qih-navy) !important;
+  font-size: 13.5px !important;
+}
+.breadcrumb-item.active {
+  color: var(--qih-text-muted) !important;
+  font-size: 13.5px !important;
+}
+
+/* ─── Back-to-top button ─────────────────────────────────── */
+.backtop,
+#back-to-top {
+  background: var(--qih-navy) !important;
+  border-radius: var(--qih-radius-md) !important;
+  box-shadow: var(--qih-shadow-md) !important;
+  bottom: 28px !important;
+  right: 28px !important;
+  transition: background var(--qih-transition), transform var(--qih-transition) !important;
+}
+.backtop:hover,
+#back-to-top:hover {
+  background: var(--qih-red) !important;
+  transform: translateY(-3px) !important;
+}
+
+/* ─── Appointment form ──────────────────────────────────── */
+.appointment-panel,
+.make-appointment,
+.qih-appt-form {
+  background: #fff !important;
+  border-radius: var(--qih-radius-xl) !important;
+  box-shadow: var(--qih-shadow-lg) !important;
+  border: 1px solid var(--qih-border) !important;
+  padding: 40px !important;
+}
+
+/* ─── News/Event cards ──────────────────────────────────── */
+.news-card,
+.blog-post-card,
+.event-item {
+  border-radius: var(--qih-radius-lg) !important;
+  overflow: hidden;
+  transition: transform var(--qih-transition), box-shadow var(--qih-transition) !important;
+}
+.news-card:hover,
+.event-item:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: var(--qih-shadow-md) !important;
+}
+
+/* ─── Consultant cards ──────────────────────────────────── */
+.team-member,
+.consultant-card {
+  border-radius: var(--qih-radius-lg) !important;
+  overflow: hidden;
+}
+.team-member img,
+.consultant-card img {
+  transition: transform 0.4s ease !important;
+}
+.team-member:hover img,
+.consultant-card:hover img {
+  transform: scale(1.05) !important;
+}
+
+/* ─── Page title sections ─────────────────────────────────── */
+.page-title,
+.inner-header {
+  position: relative;
+  overflow: hidden;
+}
+.page-title::after,
+.inner-header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(6,19,31,0.7), rgba(6,19,31,0.5));
+}
+.page-title .container,
+.inner-header .container {
+  position: relative;
+  z-index: 2;
+}
+
+/* ─── Loading / spinner ─────────────────────────────────── */
+.qih-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+.qih-loader-ring {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--qih-border);
+  border-top-color: var(--qih-navy);
+  border-radius: 50%;
+  animation: qih-spin 0.7s linear infinite;
+}
+@keyframes qih-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Badges / tags ──────────────────────────────────────── */
+.badge,
+.tag {
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  border-radius: 20px !important;
+  padding: 4px 10px !important;
+  letter-spacing: 0.2px !important;
+}
+.badge-primary,
+.badge.bg-primary {
+  background: var(--qih-navy) !important;
+}
+.badge-danger,
+.badge.bg-danger {
+  background: var(--qih-red) !important;
+}
+
+/* ─── Smooth scroll ──────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ─── Admin panel upgrade ────────────────────────────────── */
+.admin-sidebar,
+.sidebar-nav {
+  background: var(--qih-navy-dark) !important;
+}
+.admin-sidebar a,
+.sidebar-nav a {
+  color: rgba(255,255,255,0.7) !important;
+  border-radius: var(--qih-radius-sm) !important;
+  transition: background var(--qih-transition), color var(--qih-transition) !important;
+}
+.admin-sidebar a:hover,
+.sidebar-nav a:hover,
+.admin-sidebar a.active,
+.sidebar-nav a.active {
+  background: rgba(255,255,255,0.1) !important;
+  color: #fff !important;
+}
+
+/* ─── Responsive tweaks ──────────────────────────────────── */
+@media (max-width: 768px) {
+  section { padding-top: 48px; padding-bottom: 48px; }
+  .appointment-panel,
+  .qih-appt-form { padding: 24px !important; }
+}
