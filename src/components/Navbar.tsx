@@ -830,5 +830,3 @@ const Navbar = ({ token, user }: { token: string; user: User | null }) => {
 }
 
 export default Navbar
-
-export default Navbar
