@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { getDepartments } from '../lib/getDepartments'
 import { cookies } from 'next/headers'
 import { getEvents, getNews } from '../lib/getNews'
+import HeroSection from '@/components/HeroSection'
+import DepartmentsGrid from '@/components/DepartmentsGrid'
 
 interface Department {
   status: string
@@ -62,9 +64,9 @@ const page = async () => {
 
   return (
     <div className="wrapper clearfix" id="wrapperParallax">
-      <section className="slider slider-2" id="slider-2">
-        <CarousalComponent />
-      </section>
+
+      {/* ✅ UPGRADED: Replaced <CarousalComponent /> with premium HeroSection */}
+      <HeroSection />
 
       <section
         className="features-bar"
@@ -157,7 +159,6 @@ const page = async () => {
                         </Link>
                       </span>
                     </li>
-                    
                   </ul>
                 </div>
               </div>
@@ -369,95 +370,11 @@ const page = async () => {
         </div>
       </section>
 
-      {/* featured Department */}
-      <section className="blog  blog-grid blog-grid-3" id="blog-2">
-        <div className="container">
-          <div className="row">
-            <div className="col-12 col-lg-6 offset-lg-3">
-              <div className="heading heading-7 text-center">
-                <h2 className="heading-title">Featured Departments</h2>
-              </div>
-            </div>
-          </div>
+      {/* ✅ UPGRADED: Replaced Featured Departments carousel with premium DepartmentsGrid */}
+      <DepartmentsGrid departments={departments.data || []} />
 
-          <div
-            className="carousel owl-carousel carousel-dots"
-            data-slide="3"
-            data-slide-rs="2"
-            data-autoplay="true"
-            data-nav="false"
-            data-dots="true"
-            data-space="30"
-            data-loop="true"
-            data-speed="200"
-          >
-            {departments && departments?.data?.length ? (
-              departments?.data
-                .filter((dept) => dept?.is_featured === 1)
-                .map((dept, index) => (
-                  <div key={dept.id}>
-                    <div className="blog-entry" data-hover="">
-                      <div className="entry-img">
-                        <a href="">
-                          <img
-                            style={{
-                              width: '100%',
-                              height: '250px',
-                              objectFit: 'cover',
-                            }}
-                            src={
-                              dept.image
-                                ? `https://qih.driveo.pk/${dept?.image}`
-                                : `/assets/images/departments/${index + 1}.jpg`
-                            }
-                            width={500}
-                            height={500}
-                            alt={dept?.title}
-                          />
-                        </a>
-                      </div>
-
-                      <div className="entry-content">
-                        <div className="entry-title">
-                          <h4>
-                            <a href="">{dept?.title}</a>
-                          </h4>
-                        </div>
-                        <div className="entry-bio">
-                          <p>
-                            {stripHtmlTags(
-                              dept?.description ? dept?.description : ''
-                            ).substring(0, 150)}
-                            ...
-                          </p>
-                        </div>
-                        <div className="entry-more">
-                          {' '}
-                          <Link
-                            className="btn btn--white btn-line btn-line-before btn-line-inversed"
-                            href={`/departments/${dept?.id}`}
-                          >
-                            <div className="line">
-                              {' '}
-                              <span> </span>
-                            </div>
-                            <span>read more</span>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-            ) : (
-              <p>No Departments found</p>
-            )}
-          </div>
-        </div>
-        <div className="container">
-          <div className="heading heading-6">
-            <div className="row"></div>
-          </div>
-        </div>
+      {/* Process steps — unchanged */}
+      <section className="blog blog-grid blog-grid-3" id="blog-2">
         <div className="processes">
           <div className="row g-0">
             <div className="col-12 col-md-6 col-xl-3">
@@ -583,7 +500,7 @@ const page = async () => {
           </div>
         </div>
       </section>
-      {/* featured Department */}
+
     </div>
   )
 }
